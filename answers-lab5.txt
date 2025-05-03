@@ -1,0 +1,10 @@
+answers-lab5.txt
+
+Q1. Do we have to add additional code to preserve the I/O-privilege (IOPL) flag across context switches? Why or why not?
+
+A1. No. When env_create() sets the IOPL bits in the new environment’s trapframe (env->env_tf.tf_eflags), those bits become part of the saved EFLAGS value. The JOS context-switch mechanism—specifically env_pop_tf() and the corresponding save operation—always restores and preserves the entire trapframe, including EFLAGS, via the iret instruction. Consequently:
+
+1. Upon entering the file system environment, iret reloads EFLAGS (with IOPL set) from env_tf, granting the environment its I/O privilege.
+2. Upon leaving that environment, the kernel saves the current EFLAGS (including any modified IOPL bits) back into env_tf before switching to the next environment.
+
+Because JOS unconditionally saves and restores the full EFLAGS register on every context switch, no additional code is required to maintain the IOPL setting. As long as tf_eflags is not overwritten elsewhere, the I/O-privilege flag persists correctly.  
